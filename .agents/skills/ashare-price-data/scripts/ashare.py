@@ -100,15 +100,18 @@ def get_price(code, end_date="", count=10, frequency="1d"):
     raise ValueError(f"不支持的频率: {frequency}")
 
 
-def get_realtime(code):
+def _get_realtime_sina(code):
     xcode = _normalize_code(code)
     url = f"http://hq.sinajs.cn/list={xcode}"
-    resp = requests.get(url, timeout=10)
+    headers = {"Referer": "https://finance.sina.com.cn"}
+    resp = requests.get(url, timeout=10, headers=headers)
     content = resp.content.decode("gbk")
-    data_str = content.split('"')[1]
-    items = data_str.split(",")
+    parts = content.split('"')
+    if len(parts) < 2 or not parts[1].strip():
+        raise ValueError(f"新浪接口返回为空（可能被限流）")
+    items = parts[1].split(",")
     if len(items) < 32:
-        raise ValueError(f"无法获取 {code} 的实时数据")
+        raise ValueError(f"新浪接口数据不完整（仅 {len(items)} 个字段）")
     return {
         "name": items[0],
         "open": float(items[1]),
@@ -121,6 +124,36 @@ def get_realtime(code):
         "date": items[30],
         "time": items[31],
     }
+
+
+def _get_realtime_tx(code):
+    """腾讯备用实时行情：通过日线接口取最新一根 K 线 + qt 快照"""
+    xcode = _normalize_code(code)
+    url = f"http://qt.gtimg.cn/q={xcode}"
+    resp = requests.get(url, timeout=10)
+    content = resp.content.decode("gbk")
+    parts = content.split("~")
+    if len(parts) < 45:
+        raise ValueError(f"腾讯接口数据不完整")
+    return {
+        "name": parts[1],
+        "open": float(parts[5]),
+        "pre_close": float(parts[4]),
+        "price": float(parts[3]),
+        "high": float(parts[33]),
+        "low": float(parts[34]),
+        "volume": float(parts[6]),
+        "amount": float(parts[37]),
+        "date": parts[30][:8],
+        "time": parts[30][8:],
+    }
+
+
+def get_realtime(code):
+    try:
+        return _get_realtime_sina(code)
+    except Exception:
+        return _get_realtime_tx(code)
 
 
 def main():
