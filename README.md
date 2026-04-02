@@ -1,169 +1,121 @@
-# 股票分析工具
+# Stock Analysis — A 股 AI 分析助手
 
-一个全面的股票市场分析和投资研究工具包，采用模块化技能和自主代理设计，适用于专业投资者和非技术用户。
+一个面向投资者的 AI 分析工作空间。用 [opencode](https://opencode.ai) 打开，用自然语言提问，AI 自动调用内置技能帮你获取行情、分析财务、计算技术指标。
 
-## 功能特点
+**不需要写代码。** 你只需要会打字提问。
 
-- **模块化技能**：即用型分析功能，涵盖基本面、技术面和情绪面分析
-- **自主代理**：预构建的工作流程，用于筛选、监控、风险评估和报告生成
-- **自定义创建**：易于创建个性化技能和代理的框架
-- **公共API集成**：连接流行金融数据提供商
-- **用户友好**：专为非技术投资者设计，配置简单
+---
 
 ## 快速开始
 
-1. **安装软件包**：
-   ```bash
-   # 安装完整功能（技术分析 + 可视化）
-   pip install -e .[full]
-   
-   # 或仅安装核心功能
-   pip install -e .
-   ```
+```bash
+# 1. 安装依赖
+pip install -Ur requirements.txt
 
-2. **配置API密钥**：
-   ```bash
-   cp config.example.json config.json
-   # 编辑 config.json 文件，填入您的API密钥
-   ```
+# 2. 进入项目目录，启动 opencode
+cd stock-analysis
+opencode
 
-3. **运行代理**：
-   ```bash
-   stock-analysis --help
-   ```
-
-## 架构
-
-### 技能 (`.agents/skills/`)
-独立分析功能：
-- **fundamental_analysis**：财务比率、收入、利润率分析
-- **technical_analysis**：移动平均线、RSI、MACD技术指标
-- **sentiment_analysis**：新闻和社交媒体情绪分析
-- **risk_metrics**：VaR、贝塔、波动率风险计算
-
-### 代理 (`.agents/agents/`)
-自主工作流程：
-- **stock-screener**：基于可自定义条件的股票筛选
-- **portfolio-monitor**：跟踪投资组合表现和配置
-- **risk-assessor**：多层面投资风险评估
-- **market-scanner**：识别市场机会和异常情况
-- **report-writer**：生成全面分析报告
-- **alert-manager**：基于市场条件的触发通知
-
-## 使用示例
-
-### 基础股票筛选
-```python
-from agents.stock_screener import screen_stocks
-
-results = screen_stocks(
-    criteria={
-        "pe_ratio": {"max": 25},
-        "market_cap": {"min": 1000000000},
-        "dividend_yield": {"min": 0.02}
-    }
-)
+# 3. 开始提问
+# > 帮我看看贵州茅台最近的走势和技术指标
 ```
 
-### 投资组合监控
-```python
-from agents.portfolio_monitor import monitor_portfolio
+> 需要 Python 3.11+。首次使用请参考 [安装指南](docs/installation.md) 从零配置环境。
 
-report = monitor_portfolio(
-    holdings=[
-        {"symbol": "AAPL", "shares": 100},
-        {"symbol": "MSFT", "shares": 50}
-    ],
-    benchmark="SPY"
-)
+---
+
+## 内置技能
+
+| 技能 | 功能 | 问法示例 |
+|------|------|----------|
+| **A 股行情数据** | 获取历史 K 线、实时报价 | "看看茅台最近 60 天走势" |
+| **财务数据分析** | 财报数据、PE/ROE 等指标 | "分析宁德时代的财务状况" |
+| **技术指标分析** | MA/MACD/RSI/KDJ/BOLL 计算 | "平安银行的 MACD 什么情况" |
+| **股票对比分析** | 多股行情和财务横向对比 | "对比茅台和五粮液" |
+| **投资笔记管理** | 保存和查阅分析记录 | "把这次分析记下来" |
+
+---
+
+## 使用方式
+
+### 方式一：提问分析
+
+在 opencode 中直接提问，AI 自动识别你的意图并调用对应技能：
+
+```
+你：帮我全面分析一下比亚迪
+
+AI：（自动获取行情数据 → 计算技术指标 → 获取财务数据 → 输出综合分析报告）
 ```
 
-### 风险评估
-```python
-from agents.risk_assessor import assess_risk
+更多示例和详细说明请参考 **[使用指南](docs/usage-guide.md)**。
 
-risk_metrics = assess_risk(
-    symbol="AAPL",
-    confidence_level=0.95,
-    period="1y"
-)
+### 方式二：创建自定义技能
+
+每个投资者都有自己的分析方法。你可以让 AI 把你的策略做成可复用的技能：
+
+```
+你：帮我创建一个技能，筛选高股息率的股票，
+    条件是：股息率 > 3%，连续 5 年分红，PE < 20
 ```
 
-## 创建自定义技能
+AI 会在 `.agents/skills/` 下创建新技能，以后你说"高股息选股"就能直接用。
 
-1. 在 `.agents/skills/` 目录下创建新目录
-2. 遵循技能模板结构：
-   ```
-   my_skill/
-   ├── __init__.py
-   ├── main.py
-   └── README.md
-   ```
-3. 实现您的分析逻辑
-4. 在代理中使用或与他人分享
+详细规范请参考 **[自定义技能创建指南](docs/custom-skill-guide.md)**。
 
-## 创建自定义代理
+---
 
-1. 在 `.agents/agents/` 目录下创建新目录
-2. 遵循代理模板结构：
-   ```
-   my_agent/
-   ├── __init__.py
-   ├── agent.py
-   ├── config.json
-   └── README.md
-   ```
-3. 组合现有技能或创建新技能
-4. 安排运行计划或设置条件触发
-
-## API配置
-
-支持的金融数据提供商：
-- **Yahoo Finance**（免费）- 默认
-- **Alpha Vantage**（提供免费层级）
-- **Quandl**（有限免费层级）
-- **IEX Cloud**（提供免费层级）
-
-## 目录结构
+## 项目结构
 
 ```
 stock-analysis/
-├── .agents/
-│   ├── skills/          # 分析技能
-│   │   ├── fundamental_analysis/
-│   │   ├── technical_analysis/
-│   │   └── sentiment_analysis/
-│   └── agents/          # 自主代理
-│       ├── stock-screener/
-│       ├── portfolio-monitor/
-│       └── risk-assessor/
-├── config.example.json  # 配置模板
-├── pyproject.toml       # 项目依赖
-├── AGENTS.md           # 架构指南
-└── README.md           # 本文件
+├── .agents/skills/               # 分析技能
+│   ├── ashare-price-data/        # A 股行情数据
+│   ├── financial-data-analysis/  # 财务数据分析
+│   ├── technical-indicator/      # 技术指标分析
+│   ├── stock-comparison/         # 股票对比分析
+│   └── investment-notebook/      # 投资笔记管理
+├── notes/                        # 投资笔记
+│   ├── stocks/                   #   按股票归档
+│   ├── market/                   #   市场观察
+│   └── strategy/                 #   策略思考
+├── docs/                         # 文档
+│   ├── installation.md           # 安装指南
+│   ├── usage-guide.md            # 使用指南
+│   └── custom-skill-guide.md     # 自定义技能指南
+├── AGENTS.md                     # AI 助手行为规则
+├── requirements.txt              # Python 依赖
+├── LICENSE                       # MIT 许可证
+└── README.md                     # 本文件
 ```
 
-## 应用场景
+---
 
-- **快速股票筛选**：按基本面指标筛选股票
-- **技术择时**：识别买卖点
-- **风险管理**：评估投资组合风险
-- **市场情绪**：分析新闻和社交媒体
-- **自动报告**：生成定期分析报告
-- **自定义策略**：实现专有分析方法
+## 文档
 
-## 获取帮助
+| 文档 | 说明 |
+|------|------|
+| [安装指南](docs/installation.md) | Python、opencode 安装（macOS / Windows / Linux） |
+| [使用指南](docs/usage-guide.md) | 详细的提问示例和使用方法 |
+| [自定义技能创建指南](docs/custom-skill-guide.md) | 如何创建自己的分析技能 |
 
-- 查看 `AGENTS.md` 了解架构和指南
-- 每个技能和代理都有自己的README，包含使用示例
-- 使用技能创建工具构建新的分析方法
+---
 
-## 安全提示
+## 数据来源
 
-- 切勿提交API密钥或敏感数据
-- 使用环境变量存储密钥
-- 如有需要，可保持分析方法的私密性
+- **行情数据**：新浪财经、腾讯股票（公开接口，免费）
+- **财务数据**：[akshare](https://github.com/akfamily/akshare)（开源，免费）
+
+无需申请 API Key。
+
+---
+
+## 免责声明
+
+本项目仅提供数据获取和分析工具，不构成任何投资建议。投资有风险，入市需谨慎。所有分析结果仅供参考，投资决策请基于你自己的判断。
+
+---
 
 ## 许可证
 
-MIT许可证 - 详情请参阅LICENSE文件。
+[MIT](LICENSE)
