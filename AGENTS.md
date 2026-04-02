@@ -116,7 +116,36 @@ pip install -Ur requirements.txt
 
 ## 投资笔记
 
-用户的研究笔记保存在 `notes/` 目录，按 `stocks/`、`market/`、`strategy/` 分类。笔记格式和模板参考 `investment-notebook` 技能的 SKILL.md。
+用户的研究笔记保存在 `notes/` 目录（本地私有，不提交 git）。笔记格式和模板参考 `investment-notebook` 技能的 SKILL.md。
+
+### 目录结构
+
+```
+notes/
+├── stocks/<股票代码-名称>/   # 个股分析，每只股票一个子目录
+│   └── YYYY-MM-DD-<标题>.md
+├── market/                  # 大盘、行业、宏观分析
+│   └── YYYY-MM-DD-<标题>.md
+└── strategy/                # 投资策略、复盘总结
+    └── YYYY-MM-DD-<标题>.md
+```
+
+### 查找笔记的规则
+
+`notes/` 不被 git 跟踪，glob/grep 工具无法索引到其中的文件。**当用户提到笔记、报告、或某只股票的历史分析时，必须主动用 `ls` 命令搜索：**
+
+```bash
+# 列出所有个股笔记目录
+ls notes/stocks/
+
+# 模糊匹配股票名或代码
+ls notes/stocks/ | grep <关键词>
+
+# 列出某只股票的所有笔记
+ls notes/stocks/<目录名>/
+```
+
+找到文件后再用绝对路径读取，不要因为 glob 搜不到就告知用户文件不存在。
 
 ## 沟通风格
 
