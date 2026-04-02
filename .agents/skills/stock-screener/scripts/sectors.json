@@ -1,0 +1,94 @@
+{
+  "新能源": {
+    "description": "新能源发电、储能及新能源汽车产业链",
+    "sub_themes": {
+      "光伏": {
+        "concept_boards": ["光伏概念"]
+      },
+      "储能": {
+        "concept_boards": ["储能概念"]
+      },
+      "新能源车": {
+        "concept_boards": ["新能源车"]
+      },
+      "氢能": {
+        "concept_boards": ["氢能源"]
+      },
+      "核电": {
+        "concept_boards": ["核能核电"]
+      }
+    }
+  },
+  "半导体": {
+    "description": "半导体、芯片设计制造及存储",
+    "sub_themes": {
+      "半导体": {
+        "concept_boards": ["半导体概念", "第三代半导体"]
+      },
+      "国产芯片": {
+        "concept_boards": ["国产芯片", "存储芯片"]
+      }
+    }
+  },
+  "人工智能": {
+    "description": "AI 技术、算力基础设施及应用",
+    "sub_themes": {
+      "AI核心": {
+        "concept_boards": ["人工智能", "AIGC概念"]
+      },
+      "算力": {
+        "concept_boards": ["算力概念", "AI芯片"]
+      },
+      "AI应用": {
+        "concept_boards": ["AI应用", "AI智能体"]
+      }
+    }
+  },
+  "高端制造": {
+    "description": "机器人、新材料等高端制造业",
+    "sub_themes": {
+      "机器人": {
+        "concept_boards": ["机器人概念", "人形机器人"]
+      },
+      "新材料": {
+        "concept_boards": ["新材料"]
+      },
+      "航天军工": {
+        "concept_boards": ["商业航天", "军工"]
+      }
+    }
+  },
+  "数字经济": {
+    "description": "数据要素、信创及数字基础设施",
+    "sub_themes": {
+      "数据要素": {
+        "concept_boards": ["数据要素", "大数据"]
+      },
+      "信创": {
+        "concept_boards": ["信创"]
+      },
+      "数据安全": {
+        "concept_boards": ["数据安全"]
+      }
+    }
+  },
+  "生物医药": {
+    "description": "生物技术、创新药及医疗健康",
+    "sub_themes": {
+      "生物技术": {
+        "concept_boards": ["合成生物", "生物疫苗"]
+      },
+      "AI医疗": {
+        "concept_boards": ["AI制药（医疗）"]
+      }
+    }
+  },
+  "绿色经济": {
+    "description": "碳中和及绿色低碳发展",
+    "sub_themes": {
+      "碳中和": {
+        "concept_boards": ["碳中和"]
+      }
+    }
+  }
+}
