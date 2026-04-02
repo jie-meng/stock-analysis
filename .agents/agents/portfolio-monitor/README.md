@@ -1,25 +1,25 @@
-# Portfolio Monitor Agent
+# 投资组合监控代理
 
-## Purpose
-Continuously monitors investment portfolio performance, tracks asset allocation, and identifies rebalancing opportunities.
+## 用途
+持续监控投资组合表现，跟踪资产配置，识别再平衡机会。
 
-## Features
-- **Performance Tracking**: Daily/weekly/monthly returns
-- **Allocation Analysis**: Sector, asset class, geographic distribution
-- **Benchmark Comparison**: Compare against market indices
-- **Rebalancing Alerts**: Identify when allocation drifts from targets
+## 功能特点
+- **表现跟踪**：每日/每周/每月收益
+- **配置分析**：行业、资产类别、地理分布
+- **基准比较**：与市场指数对比
+- **再平衡警报**：识别配置偏离目标的情况
 
-## Usage
+## 使用方法
 ```bash
-# Start monitoring
+# 开始监控
 python monitor.py --portfolio portfolio.json
 
-# Generate report
+# 生成报告
 python monitor.py --report --period monthly
 ```
 
-## Configuration
-`portfolio.json`:
+## 配置
+`portfolio.json`：
 ```json
 {
   "holdings": [
@@ -36,9 +36,9 @@ python monitor.py --report --period monthly
 }
 ```
 
-## Metrics
-- Total return (absolute and percentage)
-- Sharpe ratio
-- Maximum drawdown
-- Alpha and beta vs benchmark
-- Dividend income tracking
+## 指标
+- 总收益（绝对值和百分比）
+- 夏普比率
+- 最大回撤
+- 相对于基准的阿尔法和贝塔值
+- 股息收入跟踪

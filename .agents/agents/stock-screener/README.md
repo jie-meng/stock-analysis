@@ -1,25 +1,25 @@
-# Stock Screener Agent
+# 股票筛选代理
 
-## Purpose
-Automatically screens stocks based on customizable criteria including fundamental metrics, technical indicators, and market conditions.
+## 用途
+基于可自定义条件自动筛选股票，包括基本面指标、技术指标和市场条件。
 
-## Features
-- **Fundamental Screening**: P/E ratio, market cap, revenue growth, profit margins
-- **Technical Screening**: Moving averages, RSI, MACD, volume patterns
-- **Market Conditions**: Sector performance, market cap rankings
-- **Custom Criteria**: User-defined screening parameters
+## 功能特点
+- **基本面筛选**：市盈率、市值、收入增长、利润率
+- **技术面筛选**：移动平均线、RSI、MACD、成交量模式
+- **市场条件**：行业表现、市值排名
+- **自定义条件**：用户定义的筛选参数
 
-## Usage
+## 使用方法
 ```bash
-# Run basic screening
+# 运行基础筛选
 python screen.py --pe-max 20 --market-cap-min 1B
 
-# Run with config file
+# 使用配置文件运行
 python screen.py --config my_screen.json
 ```
 
-## Configuration
-Create `screen_config.json`:
+## 配置
+创建 `screen_config.json`：
 ```json
 {
   "criteria": {
@@ -32,10 +32,10 @@ Create `screen_config.json`:
 }
 ```
 
-## Output
-- List of stocks meeting criteria
-- Key metrics for each stock
-- Scoring/ranking system
+## 输出结果
+- 符合条件的股票列表
+- 每只股票的关键指标
+- 评分/排名系统
 
-## Customization
-Modify `criteria.py` to add new screening criteria or adjust weighting.
+## 自定义
+修改 `criteria.py` 以添加新的筛选条件或调整权重。

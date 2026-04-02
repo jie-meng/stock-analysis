@@ -1,42 +1,42 @@
-# Market Scanner Agent
+# 市场扫描代理
 
-## Purpose
-Scans market for unusual activity, momentum shifts, and potential opportunities across multiple timeframes.
+## 用途
+扫描市场异常活动、动量变化和多个时间框架内的潜在机会。
 
-## Features
-- **Volume Scanners**: Unusual volume spikes, relative volume
-- **Price Movers**: Gainers, losers, gap up/down
-- **Technical Breakouts**: Support/resistance breaks, pattern completions
-- **Sector Rotation**: Identify leading and lagging sectors
-- **Options Activity**: Unusual options flow, high open interest
+## 功能特点
+- **成交量扫描**：异常成交量激增、相对成交量
+- **价格变动**：涨幅榜、跌幅榜、跳空高开/低开
+- **技术突破**：支撑/阻力位突破、形态完成
+- **行业轮动**：识别领先和落后行业
+- **期权活动**：异常期权流动、高未平仓合约
 
-## Usage
+## 使用方法
 ```bash
-# Daily market scan
+# 每日市场扫描
 python scan.py --type daily
 
-# Real-time scanner
+# 实时扫描
 python scan.py --type realtime --interval 5m
 
-# Custom scan
+# 自定义扫描
 python scan.py --config scan_config.json
 ```
 
-## Scan Types
+## 扫描类型
 
-### Daily Scans
-- Top gainers/losers by percentage
-- Volume breakouts (>2x average)
-- New 52-week highs/lows
-- Earnings announcements
+### 每日扫描
+- 按百分比排序的涨幅榜/跌幅榜
+- 成交量突破（>2倍平均）
+- 52周新高/新低
+- 财报公告
 
-### Intraday Scans
-- Momentum stocks
-- Reversal patterns
-- Unusual options activity
-- Dark pool prints
+### 日内扫描
+- 动量股票
+- 反转形态
+- 异常期权活动
+- 暗池交易
 
-## Configuration
+## 配置
 ```json
 {
   "scanners": {

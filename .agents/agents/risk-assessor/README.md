@@ -1,35 +1,35 @@
-# Risk Assessor Agent
+# 风险评估代理
 
-## Purpose
-Evaluates investment risk at both portfolio and individual stock levels, providing risk metrics and recommendations.
+## 用途
+评估投资组合和个股层面的投资风险，提供风险指标和建议。
 
-## Features
-- **Value at Risk (VaR)**: Calculate potential losses at confidence levels
-- **Beta Analysis**: Measure volatility relative to market
-- **Correlation Analysis**: Identify diversification effectiveness
-- **Stress Testing**: Simulate portfolio under market scenarios
-- **Sector Concentration**: Identify over-exposure risks
+## 功能特点
+- **风险价值 (VaR)**：计算置信水平下的潜在损失
+- **贝塔分析**：衡量相对于市场的波动性
+- **相关性分析**：识别分散化效果
+- **压力测试**：模拟市场情景下的投资组合表现
+- **行业集中度**：识别过度暴露风险
 
-## Usage
+## 使用方法
 ```bash
-# Assess single stock risk
+# 评估单只股票风险
 python assess.py --symbol AAPL
 
-# Assess portfolio risk
+# 评估投资组合风险
 python assess.py --portfolio portfolio.json --confidence 0.95
 
-# Stress test
+# 压力测试
 python assess.py --stress-test recession
 ```
 
-## Risk Metrics
-- Historical VaR (parametric and Monte Carlo)
-- Conditional VaR (Expected Shortfall)
-- Maximum drawdown analysis
-- Volatility (standard deviation, beta)
-- Sharpe and Sortino ratios
+## 风险指标
+- 历史VaR（参数法和蒙特卡洛法）
+- 条件VaR（预期损失）
+- 最大回撤分析
+- 波动率（标准差、贝塔）
+- 夏普比率和索提诺比率
 
-## Output Format
+## 输出格式
 ```json
 {
   "symbol": "AAPL",
@@ -41,8 +41,8 @@ python assess.py --stress-test recession
     "max_drawdown": -0.32
   },
   "recommendations": [
-    "Consider hedging with put options",
-    "Monitor tech sector correlation"
+    "考虑使用看跌期权进行对冲",
+    "监控科技行业相关性"
   ]
 }
 ```

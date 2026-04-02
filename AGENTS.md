@@ -1,44 +1,44 @@
-# Stock Analysis
+# 股票分析
 
-This directory provides specialized skills and agents for stock analysis and investment research, designed for professional investors and non-technical users.
+本目录提供股票分析和投资研究的专业技能和代理，专为专业投资者和非技术用户设计。
 
-## Architecture
+## 架构
 
-The project follows a modular architecture with two main components:
+项目采用模块化架构，包含两个主要组件：
 
-### Skills (`.agents/skills/`)
-Individual analysis functions that perform specific tasks:
-- **fundamental_analysis**: Basic financial metrics analysis
-- **technical_analysis**: Price and volume technical indicators
-- **sentiment_analysis**: News and social media sentiment
-- **risk_metrics**: Risk calculation utilities
+### 技能 (`.agents/skills/`)
+执行特定任务的独立分析功能：
+- **fundamental_analysis**：基本财务指标分析
+- **technical_analysis**：价格和成交量技术指标
+- **sentiment_analysis**：新闻和社交媒体情绪分析
+- **risk_metrics**：风险计算工具
 
-### Agents (`.agents/agents/`)
-Autonomous workflows that combine multiple skills:
-- **stock-screener**: Automated stock filtering based on criteria
-- **portfolio-monitor**: Continuous portfolio tracking and analysis
-- **risk-assessor**: Comprehensive risk evaluation
-- **market-scanner**: Market opportunity identification
-- **report-writer**: Automated report generation
-- **alert-manager**: Condition-based notification system
+### 代理 (`.agents/agents/`)
+组合多个技能的自主工作流程：
+- **stock-screener**：基于条件的自动股票筛选
+- **portfolio-monitor**：持续投资组合跟踪和分析
+- **risk-assessor**：全面风险评估
+- **market-scanner**：市场机会识别
+- **report-writer**：自动报告生成
+- **alert-manager**：基于条件的通知系统
 
-## Usage Patterns
+## 使用模式
 
-### For Non-Technical Users
-1. Fork this repository
-2. Configure API keys in `.env` file
-3. Use existing agents via simple commands
-4. Customize parameters in JSON config files
+### 非技术用户
+1. Fork本仓库
+2. 在 `.env` 文件中配置API密钥
+3. 通过简单命令使用现有代理
+4. 在JSON配置文件中自定义参数
 
-### For Technical Users
-1. Create new skills in `.agents/skills/`
-2. Build new agents in `.agents/agents/`
-3. Extend existing functionality
-4. Share improvements via pull requests
+### 技术用户
+1. 在 `.agents/skills/` 中创建新技能
+2. 在 `.agents/agents/` 中构建新代理
+3. 扩展现有功能
+4. 通过Pull Request分享改进
 
-## Skill Structure
+## 技能结构
 
-Each skill follows this pattern:
+每个技能遵循以下模式：
 ```
 skill_name/
 ├── __init__.py
@@ -46,9 +46,9 @@ skill_name/
 └── README.md
 ```
 
-## Agent Structure
+## 代理结构
 
-Each agent follows this pattern:
+每个代理遵循以下模式：
 ```
 agent_name/
 ├── __init__.py
@@ -57,33 +57,33 @@ agent_name/
 └── README.md
 ```
 
-## API Integration
+## API集成
 
-Supported financial data providers:
-- Yahoo Finance (free)
-- Alpha Vantage (free tier available)
-- Quandl (limited free tier)
-- IEX Cloud (free tier available)
+支持的金融数据提供商：
+- Yahoo Finance（免费）
+- Alpha Vantage（提供免费层级）
+- Quandl（有限免费层级）
+- IEX Cloud（提供免费层级）
 
-## User Customization
+## 用户自定义
 
-Professional investors can:
-- Modify existing agents for specific workflows
-- Create new agents for proprietary strategies
-- Combine agents for comprehensive analysis
-- Schedule automated runs
-- Set up custom alerting rules
+专业投资者可以：
+- 修改现有代理以适应特定工作流程
+- 创建新代理实现专有策略
+- 组合代理进行全面分析
+- 安排自动运行计划
+- 设置自定义警报规则
 
-## Security Note
+## 安全提示
 
-Never hardcode API keys or sensitive data. Use environment variables or secure configuration files.
+切勿硬编码API密钥或敏感数据。使用环境变量或安全配置文件。
 
-## Getting Started
+## 快速开始
 
 ```bash
-# Install with all features
+# 安装完整功能
 pip install -e .[full]
 
-# Or install core only
+# 或仅安装核心功能
 pip install -e .
 ```

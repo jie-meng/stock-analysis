@@ -1,33 +1,33 @@
-# Alert Manager Agent
+# 警报管理代理
 
-## Purpose
-Monitors market conditions and triggers alerts based on user-defined rules, enabling timely investment decisions.
+## 用途
+监控市场条件并根据用户定义的规则触发警报，实现及时的投资决策。
 
-## Features
-- **Price Alerts**: Break above/below levels, percentage moves
-- **Technical Alerts**: Indicator crossovers, pattern completions
-- **Volume Alerts**: Unusual volume, relative volume spikes
-- **Fundamental Alerts**: Earnings, dividends, analyst changes
-- **Portfolio Alerts**: Allocation drift, loss limits
+## 功能特点
+- **价格警报**：突破上方/下方价位、百分比变动
+- **技术指标警报**：指标交叉、形态完成
+- **成交量警报**：异常成交量、相对成交量激增
+- **基本面警报**：财报、股息、分析师变动
+- **投资组合警报**：配置偏离、损失限额
 
-## Usage
+## 使用方法
 ```bash
-# Add price alert
+# 添加价格警报
 python alerts.py add --symbol AAPL --type price --above 180.00
 
-# List active alerts
+# 列出活动警报
 python alerts.py list
 
-# Run alert checker
+# 运行警报检查器
 python alerts.py check --interval 5m
 
-# Remove alert
+# 移除警报
 python alerts.py remove --id 12345
 ```
 
-## Alert Types
+## 警报类型
 
-### Price Alerts
+### 价格警报
 ```json
 {
   "symbol": "AAPL",
@@ -38,7 +38,7 @@ python alerts.py remove --id 12345
 }
 ```
 
-### Technical Alerts
+### 技术指标警报
 ```json
 {
   "symbol": "MSFT",
@@ -50,7 +50,7 @@ python alerts.py remove --id 12345
 }
 ```
 
-### Portfolio Alerts
+### 投资组合警报
 ```json
 {
   "type": "portfolio",
@@ -60,13 +60,13 @@ python alerts.py remove --id 12345
 }
 ```
 
-## Notification Channels
-- Email
-- SMS (via Twilio)
-- Slack/Discord webhooks
-- Push notifications
+## 通知渠道
+- 电子邮件
+- 短信（通过Twilio）
+- Slack/Discord网页钩子
+- 推送通知
 
-## Configuration
+## 配置
 ```json
 {
   "check_interval": "1m",
