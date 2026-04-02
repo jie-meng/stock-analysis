@@ -24,9 +24,7 @@ venv/
 Thumbs.db
 
 # 投资笔记内容（用户私有数据，不应提交）
-notes/**/*.md
-!notes/.gitkeep
-!notes/**/.gitkeep
+notes/
 
 # 缓存
 .cache/
