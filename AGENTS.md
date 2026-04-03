@@ -105,6 +105,7 @@
 | 技术指标分析 | `.agents/skills/technical-indicator/` | MA/MACD/RSI/KDJ/BOLL/成交量 |
 | 股票对比分析 | `.agents/skills/stock-comparison/` | 多股行情和财务横向对比 |
 | 选股筛选器 | `.agents/skills/stock-screener/` | 高分红/价值优选/政策主题选股 |
+| 持仓组合分析 | `.agents/skills/portfolio-analyzer/` | 从持仓截图识别持仓，诊断组合健康度 |
 | 投资笔记管理 | `.agents/skills/investment-notebook/` | 保存和查阅投资研究记录 |
 
 ## 依赖管理
