@@ -11,7 +11,7 @@
 投资者选股时有三类典型需求：
 
 1. **可量化条件** — PE < 20、股息率 > 3%、ROE > 15%
-2. **多指标组合判断** — "经营状况良好"（ROE + 负债率 + 现金流交叉验证）
+2. **多指标组合判断** — "经营状况良好"（ROE + 负债率 + 利润增速交叉验证）
 3. **语义/主题条件** — "符合十五五规划"（无法用数值表达，需要人工定义范围）
 
 纯通用的参数化筛选器能处理第 1 类，但无法理解"十五五规划"；而每个需求独立写一个脚本，又会产生大量重复代码。
@@ -29,31 +29,40 @@
 │         │                │                │          │
 │         ▼                ▼                ▼          │
 │  ┌────────────────────────────────────────────────┐  │
-│  │          两阶段筛选引擎（粗筛 → 精筛）          │  │
+│  │      并发批量获取 → merge → 向量化筛选引擎      │  │
 │  └────────────────────────────────────────────────┘  │
 │         ▲                                            │
-│         │                                            │
+│         │  可与策略组合，用户参数覆盖策略默认值      │
 │  ┌──────┴──────┐                                     │
-│  │   --custom  │                                     │
-│  │ (自定义模式) │                                     │
+│  │ 自定义参数  │                                     │
 │  └─────────────┘                                     │
 │                                                      │
 │  sectors.json ← 政策主题板块映射（人工维护）          │
 └──────────────────────────────────────────────────────┘
 ```
 
-- **预设策略**：开箱即用，一个参数直接跑
-- **自定义模式**：自由组合条件，高级用户按需使用
-- **sectors.json**：把"十五五规划"这类语义条件转化为可执行的板块股票池
+### 架构：并发批量获取 → merge → 向量化筛选
 
-### 两阶段筛选
+akshare 的大部分接口是批量返回全市场数据的（一次调用返回几千只股票），但每个接口只覆盖部分字段。核心思路是**并发调用多个批量接口，用 pandas merge 合并为宽表，然后向量化过滤**。
 
-全市场逐个获取财务数据会非常慢（5000+ 只 × 每只 1-2 秒），因此采用分层过滤：
+```
+                    ┌─ 东财 clist API ──→ 板块成分股 + PE/PB/市值
+    并发线程池 ──────┤─ stock_yjbb_em ───→ ROE/EPS/利润增速/营收增速
+    (max_workers=5) ├─ stock_fhps_em ───→ 股息率
+                    ├─ stock_zcfz_em ───→ 资产负债率
+                    └─ stock_history_dividend → 分红次数
+                              │
+                              ▼
+                    merge on 代码 → 宽表
+                              │
+                              ▼
+                    向量化 boolean mask 筛选 → 排序 → 输出
+```
 
-1. **粗筛**（秒级）— 用全市场批量接口，按 PE/PB/市值/ST 一次性过滤，缩小到几十到几百只
-2. **精筛**（分钟级）— 对粗筛结果逐个获取详细的财务数据或分红记录，精确匹配条件
-
-粗筛结果超过 200 只时，自动收紧市值门槛，避免精筛阶段过慢。
+关键优化点：
+- **板块接口直调东财 API**，绕过 akshare 的 `fetch_paginated_data`（该函数每页 sleep 0.5-1.5s），27 个板块并发获取 ~60s
+- **财务数据接口并发**：yjbb/fhps/zcfz/divhist 四个接口同时跑，受最慢的 yjbb 限制 ~80s
+- 板块获取和财务获取**同时并发**，总耗时 = max(板块, 财务) ≈ 80s
 
 ---
 
@@ -66,11 +75,11 @@
 | 条件 | 阈值 | 说明 |
 |------|------|------|
 | 股息率 | ≥ 3% | 根据最新一次派息和当前股价计算 |
-| 连续分红 | ≥ 3 年 | 历史实施过的分红次数 |
+| 连续分红 | ≥ 3 次 | 历史实施过的分红次数 |
 | PE | 0 ~ 30 | 排除亏损股和泡沫 |
 | 市值 | ≥ 50 亿 | 流动性保障 |
 
-按股息率降序排序。数据源：`stock_history_dividend_detail`（逐个获取）。
+按股息率降序排序。
 
 ### value-quality — 价值优选策略
 
@@ -80,24 +89,16 @@
 |------|------|------|
 | PE | 0 ~ 25 | 估值不贵 |
 | PB | ≤ 5 | 资产端未严重高估 |
-| ROE | ≥ 12% | 资本回报能力达标 |
+| ROE | ≥ 12% | 资本回报能力达标（加权净资产收益率） |
 | 净利润增速 | ≥ 0% | 盈利至少没有恶化 |
 | 资产负债率 | ≤ 60% | 财务安全 |
 | 市值 | ≥ 80 亿 | 有一定规模 |
 
-按 ROE 降序排序。数据源：`stock_financial_analysis_indicator`（逐个获取）。
+按 ROE 降序排序。
 
 ### policy-theme — 政策主题策略
 
 **投资逻辑**：在政策重点支持方向中，筛选估值合理的标的。
-
-工作方式与前两个策略不同：
-
-1. 读取 `sectors.json`，获取主题对应的概念板块名称
-2. 调用东方财富概念板块接口，获取成分股及其行情数据（PE/PB 等）
-3. 用基本面条件过滤（排除 ST、亏损、PE 过高）
-
-**跳过全市场接口**，直接从板块数据出发，速度快得多（~2 分钟 vs ~8 分钟）。
 
 可用主题（`--theme` 参数）：
 
@@ -136,17 +137,17 @@ python .agents/skills/stock-screener/scripts/screener.py --strategy high-dividen
 python .agents/skills/stock-screener/scripts/screener.py --strategy value-quality
 python .agents/skills/stock-screener/scripts/screener.py --strategy policy-theme --theme 半导体
 
-# 自定义条件
-python .agents/skills/stock-screener/scripts/screener.py --custom \
+# 策略 + 自定义条件覆盖（可组合）
+python .agents/skills/stock-screener/scripts/screener.py --strategy policy-theme \
+  --pe-max 20 --div-yield-min 2 --roe-min 10 --debt-ratio-max 60
+
+# 纯自定义
+python .agents/skills/stock-screener/scripts/screener.py \
   --pe-max 20 --roe-min 15 --debt-ratio-max 50
 
-# 限定板块 + 自定义条件
-python .agents/skills/stock-screener/scripts/screener.py --custom \
-  --pe-max 20 --pb-max 3 --sector 光伏概念
-
-# 调整输出数量和排序
-python .agents/skills/stock-screener/scripts/screener.py --strategy high-dividend \
-  --top 50 --sort div_yield
+# 限定单板块
+python .agents/skills/stock-screener/scripts/screener.py \
+  --sector 光伏概念 --pe-max 20 --roe-min 10
 ```
 
 ### 参数速查
@@ -154,8 +155,8 @@ python .agents/skills/stock-screener/scripts/screener.py --strategy high-dividen
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
 | `--strategy` | 预设策略名 | — |
-| `--custom` | 自定义模式 | — |
-| `--theme` | 政策主题方向（仅 policy-theme） | 全部 |
+| `--theme` | 政策主题方向 | 全部 |
+| `--sector` | 限定单个概念板块 | — |
 | `--top` | 输出前 N 只 | 30 |
 | `--sort` | 排序字段 | 策略默认 |
 | `--pe-max` / `--pe-min` | PE 范围 | — / 0 |
@@ -165,9 +166,35 @@ python .agents/skills/stock-screener/scripts/screener.py --strategy high-dividen
 | `--debt-ratio-max` | 负债率上限 (%) | — |
 | `--revenue-growth-min` | 营收增速下限 (%) | — |
 | `--profit-growth-min` | 净利增速下限 (%) | — |
-| `--sector` | 限定概念板块 | — |
+| `--consecutive-div-years` | 最少分红次数 | — |
 | `--min-market-cap` | 最低市值（亿） | 50 |
 | `--include-st` | 包含 ST 股票 | 默认排除 |
+
+---
+
+## 数据源说明
+
+| 接口 | 数据内容 | 耗时 | 调用方式 |
+|------|---------|------|---------|
+| 东财 clist API | 板块成分股 + PE/PB/市值 | ~60s（27 板块并发） | 直调 HTTP，绕过 akshare sleep |
+| `stock_yjbb_em` | ROE/EPS/利润增速/营收增速/毛利率 | ~80s | akshare 批量 |
+| `stock_fhps_em` | 股息率 | ~28s | akshare 批量 |
+| `stock_zcfz_em` | 资产负债率 | ~40s | akshare 批量 |
+| `stock_history_dividend` | 分红次数/累计股息 | ~3s | akshare 批量 |
+| `stock_zh_a_spot_em` | 全市场 PE/PB/市值 | ~7min | 备选，仅无板块时使用 |
+
+ROE 使用东财业绩报表的**加权净资产收益率**，准确度与同花顺等平台一致。
+
+---
+
+## 性能参考
+
+| 场景 | 耗时 |
+|------|------|
+| 单板块 `--sector 光伏概念` | ~30 秒 |
+| 单主题 `--theme 新能源` + 财务条件 | ~1.5 分钟 |
+| 全主题 `--strategy policy-theme` + 全部条件 | ~1.5 分钟 |
+| 全市场（无 theme/sector） | ~8 分钟 |
 
 ---
 
@@ -181,11 +208,6 @@ stock-screener/
     ├── screener.py    # 筛选引擎
     └── sectors.json   # 政策主题板块映射
 ```
-
-- `SKILL.md` — 给 AI 看的，决定什么时候触发、怎么调用
-- `README.md` — 给人看的，解释设计思路和使用方法
-- `screener.py` — 核心逻辑，约 740 行
-- `sectors.json` — 板块映射，需要根据政策变化人工维护
 
 ---
 
@@ -213,20 +235,6 @@ import akshare as ak
 df = ak.stock_board_concept_name_em()
 print(df["板块名称"].tolist())
 ```
-
----
-
-## 性能参考
-
-| 场景 | 耗时 | 瓶颈 |
-|------|------|------|
-| policy-theme（单主题） | ~2 分钟 | 板块成分股接口 |
-| policy-theme（全部主题） | ~5 分钟 | 多个板块接口累加 |
-| high-dividend / value-quality | ~8-12 分钟 | 全市场接口 7 分钟 + 逐个精筛 |
-| custom（无精筛条件） | ~8 分钟 | 全市场接口 |
-| custom + --sector | ~8 分钟 | 全市场接口（板块过滤在粗筛阶段） |
-
-主要瓶颈是 `stock_zh_a_spot_em()` 全市场接口，约 7 分钟。policy-theme 策略通过绕过此接口大幅提速。
 
 ---
 
