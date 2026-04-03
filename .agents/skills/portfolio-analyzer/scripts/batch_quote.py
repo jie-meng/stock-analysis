@@ -15,20 +15,22 @@ from ashare import get_price, get_realtime
 import pandas as pd
 
 
-def calc_basic_indicators(code: str) -> dict:
+def calc_basic_indicators(code: str) -> dict[str, object]:
     """获取单只股票的实时行情 + 基础技术指标"""
-    result = {"code": code}
+    result: dict[str, object] = {"code": code}
 
     try:
         rt = get_realtime(code)
-        result["name"] = rt["name"]
-        result["price"] = rt["price"]
-        result["open"] = rt["open"]
-        result["pre_close"] = rt["pre_close"]
-        result["high"] = rt["high"]
-        result["low"] = rt["low"]
-        if rt["price"] and rt["pre_close"]:
-            result["change_pct"] = round((rt["price"] - rt["pre_close"]) / rt["pre_close"] * 100, 2)
+        result["name"] = str(rt["name"])
+        price = float(str(rt["price"]))
+        pre_close = float(str(rt["pre_close"]))
+        result["price"] = price
+        result["open"] = float(str(rt["open"]))
+        result["pre_close"] = pre_close
+        result["high"] = float(str(rt["high"]))
+        result["low"] = float(str(rt["low"]))
+        if price and pre_close:
+            result["change_pct"] = round((price - pre_close) / pre_close * 100, 2)
         else:
             result["change_pct"] = 0
     except Exception as e:
