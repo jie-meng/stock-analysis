@@ -26,7 +26,7 @@ pip install pandas requests
 运行内置脚本获取数据：
 
 ```bash
-python .agents/skills/ashare-price-data/scripts/ashare.py <证券代码> [--frequency 1d] [--count 30] [--end-date 2024-12-31] [--realtime]
+python .agents/skills/ashare-price-data/scripts/price.py <证券代码> [--frequency 1d] [--count 30] [--end-date 2024-12-31] [--realtime]
 ```
 
 ### 参数说明
@@ -43,13 +43,13 @@ python .agents/skills/ashare-price-data/scripts/ashare.py <证券代码> [--freq
 
 ```bash
 # 贵州茅台最近60个交易日日线
-python .agents/skills/ashare-price-data/scripts/ashare.py sh600519 --count 60
+python .agents/skills/ashare-price-data/scripts/price.py sh600519 --count 60
 
 # 上证指数15分钟线，最近100根
-python .agents/skills/ashare-price-data/scripts/ashare.py sh000001 --frequency 15m --count 100
+python .agents/skills/ashare-price-data/scripts/price.py sh000001 --frequency 15m --count 100
 
 # 实时行情
-python .agents/skills/ashare-price-data/scripts/ashare.py sh600519 --realtime
+python .agents/skills/ashare-price-data/scripts/price.py sh600519 --realtime
 ```
 
 ### 输出格式

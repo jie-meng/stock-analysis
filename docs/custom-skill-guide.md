@@ -215,6 +215,45 @@ description: >
 
 ---
 
+## 共享模块与数据源
+
+### 行情数据：引用 lib/ashare.py，不要复制
+
+`lib/ashare.py` 是项目级共享模块，提供单只股票的行情获取（新浪/腾讯双源，<1 秒响应）。skill 脚本通过 `sys.path` 引用它：
+
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.getcwd(), "lib"))
+from ashare import get_price, get_realtime
+```
+
+所有脚本都从项目根目录执行，所以 `os.getcwd()` 始终指向项目根。
+
+**不要复制 ashare.py 到 skill 的 scripts/ 目录**。保持单一来源，修 bug 或加功能时只改一处。
+
+现有引用关系：
+
+```
+lib/ashare.py   ← 唯一真实来源（纯库，无 CLI）
+    ↑ sys.path.insert(0, os.path.join(os.getcwd(), "lib"))
+    ├── ashare-price-data/scripts/price.py      （CLI wrapper）
+    ├── technical-indicator/scripts/indicator.py
+    └── stock-comparison/scripts/compare.py
+```
+
+### 数据接口选型
+
+创建涉及数据获取的脚本前，先阅读 `docs/data-sources.md`，了解各接口的能力和性能。核心原则：
+
+- **单只股票行情** → `ashare.py`（快，<1s）
+- **批量/全市场数据** → akshare 批量接口（yjbb/fhps/zcfz 等）
+- **板块成分股** → 直调东财 clist API（绕过 akshare 的页间 sleep）
+- **不要在循环里逐个调用慢接口**（如 `stock_financial_abstract_ths`），筛选场景用批量接口 + merge
+
+详见 [数据源参考手册](data-sources.md)。
+
+---
+
 ## 技能创建清单
 
 创建完技能后，检查以下几点：
@@ -226,3 +265,5 @@ description: >
 - [ ] 如有脚本，脚本支持命令行调用
 - [ ] 脚本的依赖包已注明
 - [ ] 输出格式为纯文本或 Markdown（便于 AI 解读）
+- [ ] 行情数据通过 `sys.path` 引用 ashare.py，未复制副本
+- [ ] 数据接口选型参考了 `docs/data-sources.md`

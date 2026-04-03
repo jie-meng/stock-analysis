@@ -9,7 +9,7 @@ import os
 
 import pandas as pd
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../ashare-price-data/scripts"))
+sys.path.insert(0, os.path.join(os.getcwd(), "lib"))
 from ashare import get_price
 
 

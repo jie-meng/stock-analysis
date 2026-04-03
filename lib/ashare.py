@@ -1,12 +1,13 @@
 """
-A 股行情数据获取 - CLI 工具
+A 股行情数据获取 — 共享库模块
 数据源：新浪财经（主）+ 腾讯股票（备），自动容错切换。
 封装自 https://github.com/mpquant/Ashare
+
+公开 API：
+    get_price(code, end_date, count, frequency) -> pd.DataFrame
+    get_realtime(code) -> dict
 """
 
-import argparse
-import json
-import sys
 import datetime
 
 import pandas as pd
@@ -22,7 +23,7 @@ def _normalize_code(code: str) -> str:
     return code
 
 
-def _get_price_day_tx(code, end_date="", count=10, frequency="1d"):
+def _get_price_day_tx(code: str, end_date: str = "", count: int = 10, frequency: str = "1d") -> pd.DataFrame:
     unit = "week" if frequency == "1w" else "month" if frequency == "1M" else "day"
     if end_date:
         end_date = end_date.split(" ")[0] if isinstance(end_date, str) else end_date.strftime("%Y-%m-%d")
@@ -40,7 +41,7 @@ def _get_price_day_tx(code, end_date="", count=10, frequency="1d"):
     return df
 
 
-def _get_price_min_tx(code, end_date=None, count=10, frequency="1d"):
+def _get_price_min_tx(code: str, end_date: str | None = None, count: int = 10, frequency: str = "1d") -> pd.DataFrame:
     ts = int(frequency[:-1]) if frequency[:-1].isdigit() else 1
     url = f"http://ifzq.gtimg.cn/appstock/app/kline/mkline?param={code},m{ts},,{count}"
     st = requests.get(url, timeout=10).json()
@@ -59,7 +60,7 @@ def _get_price_min_tx(code, end_date=None, count=10, frequency="1d"):
     return df
 
 
-def _get_price_sina(code, end_date="", count=10, frequency="60m"):
+def _get_price_sina(code: str, end_date: str = "", count: int = 10, frequency: str = "60m") -> pd.DataFrame:
     freq = frequency.replace("1d", "240m").replace("1w", "1200m").replace("1M", "7200m")
     mcount = count
     ts = int(freq[:-1]) if freq[:-1].isdigit() else 1
@@ -83,7 +84,7 @@ def _get_price_sina(code, end_date="", count=10, frequency="60m"):
     return df
 
 
-def get_price(code, end_date="", count=10, frequency="1d"):
+def get_price(code: str, end_date: str = "", count: int = 10, frequency: str = "1d") -> pd.DataFrame:
     xcode = _normalize_code(code)
     if frequency in ("1d", "1w", "1M"):
         try:
@@ -100,7 +101,7 @@ def get_price(code, end_date="", count=10, frequency="1d"):
     raise ValueError(f"不支持的频率: {frequency}")
 
 
-def _get_realtime_sina(code):
+def _get_realtime_sina(code: str) -> dict[str, object]:
     xcode = _normalize_code(code)
     url = f"http://hq.sinajs.cn/list={xcode}"
     headers = {"Referer": "https://finance.sina.com.cn"}
@@ -126,8 +127,7 @@ def _get_realtime_sina(code):
     }
 
 
-def _get_realtime_tx(code):
-    """腾讯备用实时行情：通过日线接口取最新一根 K 线 + qt 快照"""
+def _get_realtime_tx(code: str) -> dict[str, object]:
     xcode = _normalize_code(code)
     url = f"http://qt.gtimg.cn/q={xcode}"
     resp = requests.get(url, timeout=10)
@@ -149,34 +149,10 @@ def _get_realtime_tx(code):
     }
 
 
-def get_realtime(code):
+def get_realtime(code: str) -> dict[str, object]:
     try:
         return _get_realtime_sina(code)
     except Exception:
         return _get_realtime_tx(code)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="A 股行情数据获取")
-    parser.add_argument("code", help="证券代码，如 sh600519、sz000001、000001.XSHG")
-    parser.add_argument("--frequency", "-f", default="1d",
-                        help="数据频率: 1d/1w/1M/1m/5m/15m/30m/60m (默认 1d)")
-    parser.add_argument("--count", "-c", type=int, default=30, help="数据条数 (默认 30)")
-    parser.add_argument("--end-date", "-e", default="", help="截止日期 YYYY-MM-DD")
-    parser.add_argument("--realtime", "-r", action="store_true", help="获取实时行情")
-    args = parser.parse_args()
-
-    try:
-        if args.realtime:
-            data = get_realtime(args.code)
-            print(json.dumps(data, ensure_ascii=False, indent=2))
-        else:
-            df = get_price(args.code, end_date=args.end_date, count=args.count, frequency=args.frequency)
-            print(df.to_csv())
-    except Exception as e:
-        print(f"错误: {e}", file=sys.stderr)
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
