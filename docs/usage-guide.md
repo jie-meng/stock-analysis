@@ -80,7 +80,7 @@ AI 会自动：
 你：把刚才的分析记一下，保存到笔记里
 ```
 
-AI 会将分析结论整理成结构化笔记，保存到 `notes/` 目录。下次你问"之前分析过比亚迪吗"，AI 会帮你找到之前的笔记。
+AI 会将分析结论整理成结构化笔记，保存到 `invest-notes/` 目录。下次你问"之前分析过比亚迪吗"，AI 会帮你找到之前的笔记。
 
 ### 示例 7：输入外部材料
 
@@ -184,7 +184,7 @@ stock-analysis/
 │       ├── technical-indicator/     # 技术指标分析
 │       ├── stock-comparison/        # 股票对比分析
 │       └── investment-notebook/     # 投资笔记管理
-├── notes/                   # 你的投资笔记（自动创建）
+├── invest-notes/                   # 你的投资笔记（自动创建）
 ├── docs/                    # 文档
 ├── AGENTS.md               # AI 助手的行为规则
 └── README.md               # 项目说明

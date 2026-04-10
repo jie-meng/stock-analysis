@@ -28,7 +28,7 @@
 
 ## 数据源一：新浪财经 / 腾讯股票（ashare.py）
 
-**库模块位置**：`lib/ashare.py`（项目级共享模块）
+**库模块位置**：每个使用行情数据的 skill 的 `scripts/ashare.py`（各自独立）
 
 **CLI 入口**：`.agents/skills/ashare-price-data/scripts/price.py`（薄 wrapper）
 
@@ -53,28 +53,24 @@
 
 支持 `sh600519`、`sz000001`、`000001.XSHG` 等格式，内部自动转换。
 
-### 跨 skill 引用方式
+### skill 内引用方式
 
-`lib/ashare.py` 是项目级共享模块。skill 脚本通过 `sys.path` 引用：
+每个需要行情数据的 skill 在自己的 `scripts/` 目录下保存一份 `ashare.py`，通过 `__file__` 定位引用：
 
 ```python
 import os, sys
-sys.path.insert(0, os.path.join(os.getcwd(), "lib"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ashare import get_price, get_realtime
 ```
 
-所有脚本都从项目根目录执行（`python .agents/skills/xxx/scripts/yyy.py`），所以 `os.getcwd()` 始终指向项目根。
+这样 skill 可以独立安装到任意目录，不依赖项目根结构。
 
-**不要复制 ashare.py 到 skill 的 scripts/ 目录。**
-
-引用关系：
+每个 skill 的 `scripts/` 目录结构：
 
 ```
-lib/ashare.py   ← 唯一真实来源（纯库，无 CLI）
-    ↑ sys.path.insert(0, os.path.join(os.getcwd(), "lib"))
-    ├── ashare-price-data/scripts/price.py      （CLI wrapper）
-    ├── technical-indicator/scripts/indicator.py
-    └── stock-comparison/scripts/compare.py
+<skill-name>/scripts/
+├── ashare.py     ← 行情模块（本地副本）
+└── <entry>.py    ← CLI 入口
 ```
 
 ### 适用场景

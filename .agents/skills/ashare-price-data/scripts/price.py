@@ -1,6 +1,5 @@
 """
 A 股行情数据获取 - CLI 入口
-库模块位于 lib/ashare.py，本文件仅提供命令行接口。
 """
 
 import argparse
@@ -8,7 +7,7 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.getcwd(), "lib"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ashare import get_price, get_realtime
 
 

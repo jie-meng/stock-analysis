@@ -217,29 +217,17 @@ description: >
 
 ## 共享模块与数据源
 
-### 行情数据：引用 lib/ashare.py，不要复制
+## 行情数据：ashare.py（各 skill 独立）
 
-`lib/ashare.py` 是项目级共享模块，提供单只股票的行情获取（新浪/腾讯双源，<1 秒响应）。skill 脚本通过 `sys.path` 引用它：
+每个需要行情数据的 skill 在自己的 `scripts/` 目录下有一份 `ashare.py`，提供单只股票的行情获取（新浪/腾讯双源，<1 秒响应）。skill 脚本通过 `__file__` 定位引用：
 
 ```python
 import os, sys
-sys.path.insert(0, os.path.join(os.getcwd(), "lib"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ashare import get_price, get_realtime
 ```
 
-所有脚本都从项目根目录执行，所以 `os.getcwd()` 始终指向项目根。
-
-**不要复制 ashare.py 到 skill 的 scripts/ 目录**。保持单一来源，修 bug 或加功能时只改一处。
-
-现有引用关系：
-
-```
-lib/ashare.py   ← 唯一真实来源（纯库，无 CLI）
-    ↑ sys.path.insert(0, os.path.join(os.getcwd(), "lib"))
-    ├── ashare-price-data/scripts/price.py      （CLI wrapper）
-    ├── technical-indicator/scripts/indicator.py
-    └── stock-comparison/scripts/compare.py
-```
+这样 skill 可以独立安装到任意目录，不依赖项目根结构。新建需要行情数据的 skill 时，从现有 skill 的 `scripts/ashare.py` 复制一份到新 skill 的 `scripts/` 目录即可。
 
 ### 数据接口选型
 
@@ -265,5 +253,5 @@ lib/ashare.py   ← 唯一真实来源（纯库，无 CLI）
 - [ ] 如有脚本，脚本支持命令行调用
 - [ ] 脚本的依赖包已注明
 - [ ] 输出格式为纯文本或 Markdown（便于 AI 解读）
-- [ ] 行情数据通过 `sys.path` 引用 ashare.py，未复制副本
+- [ ] 如需行情数据，已将 `ashare.py` 复制到 skill 的 `scripts/` 目录，并用 `os.path.dirname(os.path.abspath(__file__))` 引用
 - [ ] 数据接口选型参考了 `docs/data-sources.md`
