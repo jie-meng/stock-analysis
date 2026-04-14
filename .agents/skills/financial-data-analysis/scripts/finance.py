@@ -113,6 +113,146 @@ def get_financial_summary(stock_code: str, years: int = 3) -> str:
     return "\n".join(lines)
 
 
+def get_latest_earnings(stock_code: str) -> str:
+    """获取最新业绩快报和业绩预告"""
+    lines = ["## 最新业绩动态\n"]
+
+    found_kb = False
+    for date_str in ["20251231", "20250930", "20250630", "20250331"]:
+        try:
+            df = ak.stock_yjkb_em(date=date_str)
+            if df is None or df.empty:
+                continue
+            row = df[df["股票代码"] == stock_code]
+            if row.empty:
+                continue
+
+            r = row.iloc[0]
+            period = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
+            lines.append(f"### 业绩快报（{period}）\n")
+
+            rev = r.get("营业收入-营业收入", 0)
+            rev_prev = r.get("营业收入-去年同期", 0)
+            rev_growth = r.get("营业收入-同比增长", None)
+            profit = r.get("净利润-净利润", 0)
+            profit_prev = r.get("净利润-去年同期", 0)
+            profit_growth = r.get("净利润-同比增长", None)
+
+            lines.append("| 指标 | 本期 | 去年同期 | 同比增长 |")
+            lines.append("|------|------|---------|---------|")
+
+            def _fmt_yi(v):
+                return f"{float(v) / 1e8:.2f}亿" if v else "N/A"
+
+            def _fmt_pct(v):
+                return f"{float(v):.2f}%" if v is not None else "N/A"
+
+            lines.append(f"| 营业收入 | {_fmt_yi(rev)} | {_fmt_yi(rev_prev)} | {_fmt_pct(rev_growth)} |")
+            lines.append(f"| 净利润 | {_fmt_yi(profit)} | {_fmt_yi(profit_prev)} | {_fmt_pct(profit_growth)} |")
+
+            eps = r.get("每股收益", "N/A")
+            roe = r.get("净资产收益率", "N/A")
+            lines.append(f"\n- **每股收益**: {eps} 元")
+            lines.append(f"- **净资产收益率**: {roe}%")
+            lines.append(f"- **公告日期**: {r.get('公告日期', 'N/A')}")
+            found_kb = True
+            break
+        except Exception:
+            continue
+
+    if not found_kb:
+        lines.append("暂无业绩快报数据")
+
+    lines.append("")
+
+    for date_str in ["20260331", "20251231", "20250930", "20250630"]:
+        try:
+            df = ak.stock_yjyg_em(date=date_str)
+            if df is None or df.empty:
+                continue
+            row = df[df["股票代码"] == stock_code]
+            if row.empty:
+                continue
+
+            r = row.iloc[0]
+            period = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
+            lines.append(f"### 业绩预告（{period}）\n")
+            lines.append(f"- **预告类型**: {r.get('预告类型', 'N/A')}")
+            lines.append(f"- **预测数值**: {r.get('预测数值', 'N/A')}")
+            lines.append(f"- **业绩变动幅度**: {r.get('业绩变动幅度', 'N/A')}")
+
+            reason = r.get("业绩变动原因", "")
+            if reason and str(reason) != "nan":
+                lines.append(f"- **变动原因**: {reason}")
+            break
+        except Exception:
+            continue
+
+    return "\n".join(lines)
+
+
+def get_valuation_context(stock_code: str) -> str:
+    """获取估值上下文：PE(TTM) 历史分位数"""
+    lines = ["## 估值上下文\n"]
+
+    try:
+        df = ak.stock_zh_valuation_baidu(
+            symbol=stock_code, indicator="市盈率(TTM)", period="近一年"
+        )
+        if df is not None and not df.empty:
+            values = df["value"].dropna()
+            current = values.iloc[-1]
+            pe_min = values.min()
+            pe_max = values.max()
+            pe_median = values.median()
+            percentile = (values < current).sum() / len(values) * 100
+
+            lines.append("### PE(TTM) 近一年分布\n")
+            lines.append(f"- **当前 PE(TTM)**: {current:.2f}")
+            lines.append(f"- **近一年最低**: {pe_min:.2f}")
+            lines.append(f"- **近一年最高**: {pe_max:.2f}")
+            lines.append(f"- **近一年中位数**: {pe_median:.2f}")
+            lines.append(f"- **当前分位**: {percentile:.1f}%（低于{percentile:.0f}%的交易日）")
+
+            if percentile <= 20:
+                lines.append(f"- **分位解读**: 处于近一年较低水平")
+            elif percentile <= 40:
+                lines.append(f"- **分位解读**: 处于近一年偏低水平")
+            elif percentile <= 60:
+                lines.append(f"- **分位解读**: 处于近一年中等水平")
+            elif percentile <= 80:
+                lines.append(f"- **分位解读**: 处于近一年偏高水平")
+            else:
+                lines.append(f"- **分位解读**: 处于近一年较高水平")
+        else:
+            lines.append("未获取到 PE(TTM) 历史数据")
+    except Exception as e:
+        lines.append(f"获取 PE 历史数据失败: {e}")
+
+    lines.append("")
+
+    try:
+        df_pb = ak.stock_zh_valuation_baidu(
+            symbol=stock_code, indicator="市净率", period="近一年"
+        )
+        if df_pb is not None and not df_pb.empty:
+            values = df_pb["value"].dropna()
+            current = values.iloc[-1]
+            pb_min = values.min()
+            pb_max = values.max()
+            percentile = (values < current).sum() / len(values) * 100
+
+            lines.append("### PB 近一年分布\n")
+            lines.append(f"- **当前 PB**: {current:.2f}")
+            lines.append(f"- **近一年最低**: {pb_min:.2f}")
+            lines.append(f"- **近一年最高**: {pb_max:.2f}")
+            lines.append(f"- **当前分位**: {percentile:.1f}%")
+    except Exception:
+        pass
+
+    return "\n".join(lines)
+
+
 def get_report(stock_code: str, report_type: str) -> str:
     symbol_em = _market_prefix(stock_code)
     lines = []
@@ -214,6 +354,12 @@ def main():
     parser.add_argument("--report", "-r", default="all",
                         choices=["balance", "income", "cashflow", "all"],
                         help="报表类型 (默认 all)")
+    parser.add_argument("--valuation", "-v", action="store_true",
+                        help="输出估值上下文（PE/PB 历史分位）")
+    parser.add_argument("--earnings", "-e", action="store_true",
+                        help="输出最新业绩快报/预告")
+    parser.add_argument("--full", "-f", action="store_true",
+                        help="输出全部信息（含估值上下文和业绩快报）")
     args = parser.parse_args()
 
     code = args.code.lstrip("0") if len(args.code) > 6 else args.code
@@ -222,6 +368,14 @@ def main():
     print(get_financial_summary(code, args.years))
     print("\n---\n")
     print(get_report(code, args.report))
+
+    if args.earnings or args.full:
+        print("\n---\n")
+        print(get_latest_earnings(code))
+
+    if args.valuation or args.full:
+        print("\n---\n")
+        print(get_valuation_context(code))
 
 
 if __name__ == "__main__":

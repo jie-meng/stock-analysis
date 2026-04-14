@@ -29,6 +29,15 @@ python .agents/skills/financial-data-analysis/scripts/finance.py <股票代码> 
 python .agents/skills/financial-data-analysis/scripts/finance.py <股票代码> --report balance
 python .agents/skills/financial-data-analysis/scripts/finance.py <股票代码> --report income
 python .agents/skills/financial-data-analysis/scripts/finance.py <股票代码> --report cashflow
+
+# 包含最新业绩快报/预告
+python .agents/skills/financial-data-analysis/scripts/finance.py <股票代码> --earnings
+
+# 包含估值上下文（PE/PB 历史分位）
+python .agents/skills/financial-data-analysis/scripts/finance.py <股票代码> --valuation
+
+# 全部输出（财务 + 报表 + 业绩快报 + 估值分位）
+python .agents/skills/financial-data-analysis/scripts/finance.py <股票代码> --full
 ```
 
 ### 参数说明
@@ -37,7 +46,10 @@ python .agents/skills/financial-data-analysis/scripts/finance.py <股票代码> 
 |------|------|--------|
 | 股票代码 | 6 位纯数字，如 `600519`、`000001` | 必填 |
 | `--years` | 分析最近几年的数据 | `3` |
-| `--report` | 指定报表：`balance`（资产负债表）/ `income`（利润表）/ `cashflow`（现金流量表）/ `all`（全部） | `all` |
+| `--report` | 指定报表：`balance` / `income` / `cashflow` / `all` | `all` |
+| `--earnings` | 输出最新业绩快报和业绩预告 | 不输出 |
+| `--valuation` | 输出 PE/PB 近一年历史分位数 | 不输出 |
+| `--full` | 输出全部信息（等价于 --earnings --valuation） | 不输出 |
 
 ### 输出内容
 
@@ -48,6 +60,8 @@ python .agents/skills/financial-data-analysis/scripts/finance.py <股票代码> 
 3. **成长性**：营收增长率、净利润增长率
 4. **财务安全**：资产负债率、流动比率、速动比率
 5. **现金流**：经营现金流/净利润比率
+6. **最新业绩**（--earnings）：业绩快报（自动搜索最近已披露的报告期）和业绩预告
+7. **估值上下文**（--valuation）：PE(TTM)/PB 近一年分位数、最高/最低/中位数
 
 ## 分析框架参考
 
