@@ -1,5 +1,5 @@
 {
-  "extraPaths": ["lib"],
+  "extraPaths": ["lib", ".agents/shared"],
   "pythonVersion": "3.12",
   "typeCheckingMode": "basic"
 }

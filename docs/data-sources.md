@@ -28,7 +28,7 @@
 
 ## 数据源一：新浪财经 / 腾讯股票（ashare.py）
 
-**库模块位置**：每个使用行情数据的 skill 的 `scripts/ashare.py`（各自独立）
+**库模块位置**：`.agents/shared/ashare.py`（共享模块，所有 skill 共用）
 
 **CLI 入口**：`.agents/skills/ashare-price-data/scripts/price.py`（薄 wrapper）
 
@@ -55,22 +55,24 @@
 
 ### skill 内引用方式
 
-每个需要行情数据的 skill 在自己的 `scripts/` 目录下保存一份 `ashare.py`，通过 `__file__` 定位引用：
+行情模块 `ashare.py` 统一存放在 `.agents/shared/` 目录，各 skill 通过 `__file__` 向上定位引用：
 
 ```python
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir, os.pardir, "shared"))
 from ashare import get_price, get_realtime
 ```
 
-这样 skill 可以独立安装到任意目录，不依赖项目根结构。
-
-每个 skill 的 `scripts/` 目录结构：
+共享模块目录结构：
 
 ```
-<skill-name>/scripts/
-├── ashare.py     ← 行情模块（本地副本）
-└── <entry>.py    ← CLI 入口
+.agents/
+├── shared/
+│   ├── __init__.py
+│   └── ashare.py     ← 行情模块（唯一副本）
+└── skills/
+    └── <skill-name>/scripts/
+        └── <entry>.py    ← CLI 入口
 ```
 
 ### 适用场景

@@ -1,3 +1,4 @@
+# pyright: reportAttributeAccessIssue=false
 """
 技术指标分析 - CLI 工具
 基于行情数据计算 MA、MACD、RSI、KDJ、BOLL、成交量等技术指标。
@@ -5,13 +6,12 @@
 """
 
 import argparse
-import json
 import sys
 import os
 
 import pandas as pd
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir, os.pardir, "shared"))
 from ashare import get_price
 
 

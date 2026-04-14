@@ -107,14 +107,22 @@
 | **框架型**（无脚本） | 提供分析思路和模板，调用其他技能获取数据 | 巴菲特分析框架、行业分析模板 |
 | **混合型** | 有专属脚本 + 调用其他技能补充数据 | 综合估值分析 |
 
-### 技能目录结构
+### 目录结构
 
 ```
-.agents/skills/技能名/
-├── SKILL.md          # 必须
-└── scripts/          # 脚本型/混合型需要
-    └── xxx.py
+.agents/
+├── shared/               # 跨技能共用模块
+│   ├── __init__.py
+│   └── ashare.py         # 行情获取（新浪/腾讯双源）
+└── skills/
+    └── 技能名/
+        ├── SKILL.md      # 必须
+        └── scripts/      # 脚本型/混合型需要
+            └── xxx.py
 ```
+
+`shared/` 只放**被 2 个以上 skill 用到的**代码。当前包含行情获取模块 `ashare.py`。
+skill 脚本通过 `sys.path.insert` 指向 `shared/` 目录来引用共享模块。
 
 详细规范参考 `docs/custom-skill-guide.md`。数据接口选型参考 `docs/data-sources.md`。
 

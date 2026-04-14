@@ -217,17 +217,19 @@ description: >
 
 ## 共享模块与数据源
 
-## 行情数据：ashare.py（各 skill 独立）
+## 行情数据：ashare.py（共享模块）
 
-每个需要行情数据的 skill 在自己的 `scripts/` 目录下有一份 `ashare.py`，提供单只股票的行情获取（新浪/腾讯双源，<1 秒响应）。skill 脚本通过 `__file__` 定位引用：
+行情获取模块 `ashare.py` 位于 `.agents/shared/` 目录，提供单只股票的行情获取（新浪/腾讯双源，<1 秒响应）。所有需要行情数据的 skill 共用这一份代码。
+
+skill 脚本通过 `__file__` 向上定位 `.agents/shared/` 目录来引用：
 
 ```python
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir, os.pardir, "shared"))
 from ashare import get_price, get_realtime
 ```
 
-这样 skill 可以独立安装到任意目录，不依赖项目根结构。新建需要行情数据的 skill 时，从现有 skill 的 `scripts/ashare.py` 复制一份到新 skill 的 `scripts/` 目录即可。
+新建需要行情数据的 skill 时，直接用上面的引用方式即可，不需要复制 `ashare.py`。
 
 ### 数据接口选型
 
@@ -253,5 +255,5 @@ from ashare import get_price, get_realtime
 - [ ] 如有脚本，脚本支持命令行调用
 - [ ] 脚本的依赖包已注明
 - [ ] 输出格式为纯文本或 Markdown（便于 AI 解读）
-- [ ] 如需行情数据，已将 `ashare.py` 复制到 skill 的 `scripts/` 目录，并用 `os.path.dirname(os.path.abspath(__file__))` 引用
+- [ ] 如需行情数据，已用 `sys.path.insert` 指向 `.agents/shared/` 并 `from ashare import ...`（不要复制 `ashare.py` 到 skill 目录）
 - [ ] 数据接口选型参考了 `docs/data-sources.md`

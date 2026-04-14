@@ -7,9 +7,7 @@ import argparse
 import sys
 import os
 
-import pandas as pd
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir, os.pardir, "shared"))
 from ashare import get_price
 
 
