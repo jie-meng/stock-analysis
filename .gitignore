@@ -29,3 +29,13 @@ invest-notes/
 # 缓存
 .cache/
 .ruff_cache/
+
+# AI tools config
+CLAUDE.md
+.claude
+.codex
+.cursor
+GEMINI.md
+.gemini
+.opencode
+**/graphify-out/
